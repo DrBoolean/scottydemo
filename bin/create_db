@@ -1,0 +1,21 @@
+#!/usr/bin/env node
+
+var env = process.env.NODE_ENV || 'development';
+
+var _ = require('lodash');
+var configs = require('../config/db.json');
+var pg = require('pg');
+pg.connect(_.assign({}, configs[env], {database: 'postgres'}), function(err, client, done){
+  if(err){console.log(err); process.exit(1);}
+  client.query('create database '+configs[env].database, function(err, result){
+    if(env == 'development'){
+      client.query('create database '+configs.test.database, function(err, result) {
+        done();
+        process.exit();
+      });
+    } else {
+      done();
+      process.exit();
+    }
+  });
+});

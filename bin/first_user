@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+
+var _ = require('lodash');
+var configs = require('../config/db.json');
+var conn = require('../db')(process.env.NODE_ENV || 'development');
+var models = require('../models')(conn);
+
+console.log('Enter data for initial admin user:\n');
+var prompt = require('prompt');
+
+prompt.start();
+prompt.get([
+  {name: 'email', required: true},
+  {name: 'password', required: true, hidden: true},
+], function(err, data){
+  data.admin = true;
+  models.users.createFromForm(data).map(process.exit).fork(console.log, console.log);
+});
