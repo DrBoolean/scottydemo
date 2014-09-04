@@ -5,18 +5,30 @@ module.exports = function(snappy, models) {
     , status = snappy.status
     , body = snappy.body
     , users = models.users
+    , App = snappy.App
+    , _ = require('lodash')
     ;
 
-    snappy.get('/users', compose(chain(json), lift, users.all));
+    var setUser = function(attrs) {
+      return App.ask.map(function(req) {
+        return _.assign(attrs, {user: req.user})
+      });
+    };
 
-    snappy.get('/users/:id', compose( chain(maybe(status(404), json))
-                                    , chain(compose(lift, users.get))
-                                    , param('id')
-                                    ))
+    snappy.get('/users', function() {
+      return lift(users.all({})).chain(json);
+    });
 
-    snappy.post('/users', compose( chain(json)
-                                 , chain(bireduce(status(400), status(200)))
-                                 , chain(compose(lift, users.create))
-                                 , body))
+    snappy.get('/users/:id', function() {
+      return param('id').chain(compose(lift, users.get))
+                        .chain(maybe(status(404), json));
+    });
+
+    snappy.post('/users', function() {
+      return body.chain(setUser)
+                 .chain(compose(lift, users.create))
+                 .chain(bireduce(status(400), status(200)))
+                 .chain(json);
+    });
 };
 
