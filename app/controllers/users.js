@@ -4,8 +4,8 @@ module.exports = function(snappy, models) {
     , param = snappy.param
     , status = snappy.status
     , body = snappy.body
-    , users = models.users
     , App = snappy.App
+    , users = models.users
     , _ = require('lodash')
     ;
 
